@@ -3,25 +3,30 @@ name: CI SecOps
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   security:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Poetry
-        run: pip install poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
 
-      - name: Install deps
-        run: poetry install
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Run Safety
-        run: poetry run safety scan
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run Safety check
+        run: poetry run safety checkg
